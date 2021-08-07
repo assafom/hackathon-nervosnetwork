@@ -4,8 +4,10 @@
 ![Step 5.1](5.1.png)
 
 ## The address of the ERC20 Proxy Contract you deployed (in text format).
+0x4f787f3936efFd6E4db351c7dc245ba9f49c556e
 
 ## A screenshot of the console output immediately after checking your SUDT balance.
 ![Step 5.3](5.3.png)
 
 ## The Ethereum address that was checked (in text format).
+0xF858a3C815A4AF770b929B1Cc0022D38dB133142
