@@ -9,6 +9,9 @@ Before voting:
 After voting:
 ![After voting](7.1.2.png)
 
+Config that shows it's running on Godwoken Testnet:
+![Godwoken](7.1.3.png)
+
 ## Link to the GitHub repository with your application which has been ported to Godwoken. This must be a different application than the one covered in this guide.
 [https://github.com/assafom/dapp-nervos-integration](https://github.com/assafom/dapp-nervos-integration)
 
