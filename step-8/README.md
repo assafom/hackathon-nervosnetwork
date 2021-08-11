@@ -17,6 +17,14 @@ I've also added the user's layer 1 deposit address, and the user's ckEth balance
 
 
 ## A screenshot or video of your EVM application on Layer 2 with Force Bridge support.
+In the next image, you can see for the candidates and the user their deposit address and ckEth balance.
+
+Note that at this point the donations balance for the candidates are empty.
+![initial](8.1.2.png)
+
+
+After seeing this, the user deposited to Candidate 1's address via the Force Bridge. We can see the transfer succeeded and candidate 1's balance has grown.
+![after](8.2.1.png)
 
 ## The address of the SUDT-ERC20 Proxy Contract that you deployed (in text format).
 ```
