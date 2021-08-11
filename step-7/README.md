@@ -2,6 +2,7 @@
 
 ## Screenshots or video of your application running on Godwoken.
 This is an election app - the user can choose who to vote to, and can vote only once.
+
 Before voting:
 ![Before voting](7.1.1.png)
 
