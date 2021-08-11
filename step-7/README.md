@@ -14,12 +14,12 @@ After voting:
 ## If you deployed any smart contracts as part of this tutorial, please provide the transaction hash of the deployment transaction, the deployed contract address, and the ABI of the deployed smart contract. (Provide all in text format.)
 Deployment transaction hash:
 ```
-0x4bd01cbdd44796d108613d3aee6f4b5291bee0080283acedd60f841ce9908a0f
+0x62287a4109ea927ae03e43f722492b9f44a95a7bcd1d5102424d963fdde4560d
 ```
 
 Deployed contract address:
 ```
-0xc4AdA701d04e2261C91822d207F5BFc55E68ea5f
+0xd5A32a5c1d213bb19702DAacac642899746bEa1D
 ```
 
 ABI:
