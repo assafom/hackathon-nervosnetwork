@@ -231,3 +231,5 @@ And when running in the browser, I saw:
 Yay, basically running!
 
 But I knew we aren't finished yet; there are two things we haven't done. We haven't set a gas limit to the transactions, and we haven't converted Ethereum addresses to Godwoken addresses. And indeed, trying to execute a command that changes the contract's state (and not just reads info) has failed.
+
+After adding dependedy, npm install, babel
