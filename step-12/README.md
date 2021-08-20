@@ -79,12 +79,12 @@ const polyjuiceHttpProvider = new PolyjuiceHttpProvider(
      },
    ],
    polyjuice_config
- );`
+ );
 ```
 Now we only need to configure the truffle network to connect to the Godwoken RPC we configured, and use the Polyjuice provider.
 ```
 networks: {
-     development: {
+      development: {
        host: rpc_url.hostname, // Localhost (default: none)
        port: rpc_url.port, // Standard Ethereum port (default: none)
        gasPrice: "0", // notice: `gasPrice: 0` won't work in dryRun mode. 0 must be string type.
@@ -93,3 +93,68 @@ networks: {
      }
    }
 ```
+And that's it for truffle-config!
+
+#### The final truffle-config.js file
+```
+const { PolyjuiceHDWalletProvider } = require("@polyjuice-provider/truffle");
+const { PolyjuiceHttpProvider } = require("@polyjuice-provider/web3");
+
+const root = require("path").join.bind(this, __dirname, ".");
+require("dotenv").config({ path: root(".env") });
+
+const rpc_url = new URL(process.env.WEB3_JSON_RPC);
+
+const godwoken_rpc_url = process.env.WEB3_JSON_RPC;
+const polyjuice_config = {
+  rollupTypeHash: process.env.ROLLUP_TYPE_HASH,
+  ethAccountLockCodeHash: process.env.ETH_ACCOUNT_LOCK_CODE_HASH,
+  web3Url: godwoken_rpc_url,
+};
+
+const polyjuiceHttpProvider = new PolyjuiceHttpProvider(
+  polyjuice_config.web3Url,
+  polyjuice_config
+);
+const polyjuiceTruffleProvider = new PolyjuiceHDWalletProvider(
+  [
+    {
+      privateKeys: [process.env.PRIVATE_KEY],
+      providerOrUrl: polyjuiceHttpProvider,
+    },
+  ],
+  polyjuice_config
+);
+
+module.exports = {
+  networks: {
+    development: {
+      host: rpc_url.hostname, // Localhost (default: none)
+      port: rpc_url.port, // Standard Ethereum port (default: none)
+      gasPrice: "0", // notice: `gasPrice: 0` won't work in dryRun mode. 0 must be string type.
+      network_id: "*", // Any network (default: none)
+      provider: () => polyjuiceTruffleProvider,
+    }
+  },
+
+  // Configure your compilers
+  compilers: {
+    solc: {
+      version: "0.7.6"
+    },
+  },
+
+  db: {
+    enabled: false,
+  },
+};
+```
+
+If you followed this far, you can run ```truffle migrate --reset``` and see the contracts being deployed. Make sure your Ethereum address is funded [(see here)](https://gitcoin.co/issue/nervosnetwork/grants/2/100026208).
+
+Note: my truffle deployment is a usual affair:
+(truffle deployment)[truffle-deploy.png]
+
+
+### Front-end
+My DApp instanstiated 
