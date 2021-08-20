@@ -214,13 +214,20 @@ npm run-script build
 Now the client has started, however, it couldn't load the contracts.
 
 This is the method I was using to get a Web3 contract instance:
+
 <img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/contract-set.png" width="500">
 
 Upon debugging, I realised that networkId is coming as a hex string (116e1), while the PrisaleContract object.networks held the networkId as a dec (71393). So I changed the hex string to decimal using ParseInt.
 Also, while looking at this code, I realised I use window.ethereum, which we substituted for the PolyjuiceHttpProvider previously. I'm not sure if it makes a difference in this scenario as the front end was working now, but I decided to change it also to use the PolyjuiceHttpProvider we set up earlier.
 
 After these changes, this is how the code looked like:
+
 <img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/contract-set-fixed.png" width="500">
 
 And when running in the browser, I saw:
+
 <img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="500">
+
+Yay, basically running!
+
+But I knew we aren't finished yet; there are two things we haven't done. We haven't set a gas limit to the transactions, and we haven't converted Ethereum addresses to Godwoken addresses. And indeed, trying to execute a command that changes the contract's state (and not just reads info) has failed.
