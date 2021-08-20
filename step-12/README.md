@@ -153,7 +153,13 @@ module.exports = {
 If you followed this far, you can run ```truffle migrate --reset``` and see the contracts being deployed. Make sure your Ethereum address is funded [(see here)](https://gitcoin.co/issue/nervosnetwork/grants/2/100026208).
 
 Note: my truffle deployment is a usual affair:
-(truffle deployment)[truffle-deploy.png]
+![truffle deployment](truffle-deploy.png)
+
+And after the deployment, I initialise the contracts with some basic values:
+![truffle init](truffle-init.png)
+
+At this point, when the contracts have been deployed, we can already see something interesting: the conversion between Ethereum address and Godwoken address. When in the init script I print the contract's owner, I'm getting my Godwoken address.
+
 
 
 ### Front-end
