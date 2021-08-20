@@ -15,7 +15,7 @@ But if you have your own DApp using Truffle that you'd like to port, this tutori
 
 The porting consists of few simple steps:
 
-* Back-end:
+* Truffle - deploying smart contracts:
   * Change truffle's network to a Godwoken testnet RPC, and set the providers to support Polyjuice.
 
 * Front-end:
@@ -23,7 +23,7 @@ The porting consists of few simple steps:
   * Use a supplied module for translating addresses Ethereum <-> Godwoken
   * 
 
-### Back-end (Truffle)
+### Truffle Deployment
 The DApp I am currently working on hasn't been deployed yet, and my Truffle configuration only consisted of connecting to my local Ganache instance.
 
 To get Truffle to connect and deploy to the Godwoken Testnet, we need to use custom providers for Ethereum libraries that will handle the changes between Ethereum and Godwoken-Polyjuice (such as different transaction structure and different signing mechanism).
@@ -153,14 +153,52 @@ module.exports = {
 If you followed this far, you can run ```truffle migrate --reset``` and see the contracts being deployed. Make sure your Ethereum address is funded [(see here)](https://gitcoin.co/issue/nervosnetwork/grants/2/100026208).
 
 Note: my truffle deployment is a usual affair:
-![truffle deployment](truffle-deploy.png)
+
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/truffle-deploy.png" width="500">
 
 And after the deployment, I initialise the contracts with some basic values:
-![truffle init](truffle-init.png)
+
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/truffle-init.png" width="500">
 
 At this point, when the contracts have been deployed, we can already see something interesting: the conversion between Ethereum address and Godwoken address. When in the init script I print the contract's owner, I'm getting my Godwoken address.
 
 
 
 ### Front-end
-My DApp instanstiated 
+There are basically two things that are needed here.
+
+1. Essentially, my DApp instanstiated web3 using ```new Web3(window.ethereum)```. We need to replace this with a web3 Polyjuice provider.
+
+2. We need to be able to convert Ethereum addresses to Godwoken addresses. This we can do with the nervos-godwoken-integration module.
+
+So first let's navigate to the front-end directory and install the modules:
+```
+npm install @polyjuice-provider/web3@0.0.1-rc7 nervos-godwoken-integration@0.0.6
+```
+
+After doing so, I have created a config file (similar to the Truffle config file) with the settings for the Polyjuice provider. The file is named 'config.js' and is placed at my main src client directory.
+```
+export const CONFIG = {
+    WEB3_PROVIDER_URL: 'https://godwoken-testnet-web3-rpc.ckbapp.dev',
+    ROLLUP_TYPE_HASH: '0x4cc2e6526204ae6a2e8fcf12f7ad472f41a1606d5b9624beebd215d780809f6a',
+    ETH_ACCOUNT_LOCK_CODE_HASH: '0xdeec13a7b8e100579541384ccaf4b5223733e4a5483c3aec95ddc4c1d5ea5b22'
+};
+```
+
+In my React app, I instantitate Web3 from a file called getWeb3.js. So there I have imported the dependencies:
+```
+import { PolyjuiceHttpProvider } from '@polyjuice-provider/web3';
+import { CONFIG } from '../config';
+```
+
+And where I previously created Web3 by executing ```const web3 = new Web3(window.ethereum);```, I change it to use the configured Polyjuice provider.
+```
+const godwokenRpcUrl = CONFIG.WEB3_PROVIDER_URL;
+const providerConfig = {
+    rollupTypeHash: CONFIG.ROLLUP_TYPE_HASH,
+    ethAccountLockCodeHash: CONFIG.ETH_ACCOUNT_LOCK_CODE_HASH,
+    web3Url: godwokenRpcUrl
+};
+const provider = new PolyjuiceHttpProvider(godwokenRpcUrl, providerConfig);
+const web3 = new Web3(provider);
+```
