@@ -2,7 +2,7 @@
 
 ## How I ported my Ethereum DApp to Polyjuice (and how you can too)
 
-In this article we'll walk through porting an Ethereum DApp that runs on Truffle and React to Nervos Network's Polyjuice framework.
+In this article we'll walk through porting an Ethereum DApp that runs on Truffle and React (based on create-react-app) to Nervos Network's Polyjuice framework.
 
 If you're here, I assume you know what these terms mean, and you have your own DApp you want to port, or at least understand what that entails.
 
@@ -93,7 +93,7 @@ networks: {
      }
    }
 ```
-And that's it for truffle-config!
+And that's it for truffle-config. I also have a contracts_build_directory config that points to the client directory where the front end will read the contract artifact from.
 
 #### The final truffle-config.js file
 ```
@@ -127,6 +127,7 @@ const polyjuiceTruffleProvider = new PolyjuiceHDWalletProvider(
 );
 
 module.exports = {
+contracts_build_directory: require("path").join(__dirname, "client/src/contracts"),
   networks: {
     development: {
       host: rpc_url.hostname, // Localhost (default: none)
@@ -188,7 +189,7 @@ export const CONFIG = {
 In my React app, I instantitate Web3 from a file called getWeb3.js. So there I have imported the dependencies:
 ```
 import { PolyjuiceHttpProvider } from '@polyjuice-provider/web3';
-import { CONFIG } from '../config';
+import { CONFIG } from './config.js';
 ```
 
 And where I previously created Web3 by executing ```const web3 = new Web3(window.ethereum);```, I change it to use the configured Polyjuice provider.
@@ -202,3 +203,24 @@ const providerConfig = {
 const provider = new PolyjuiceHttpProvider(godwokenRpcUrl, providerConfig);
 const web3 = new Web3(provider);
 ```
+
+At this point I know I wasn't finished, but I thought that the front end should at least be running now so let's check it.
+
+After getting an error when trying to run, I realised I should build the client using:
+```
+npm run-script build
+```
+
+Now the client has started, however, it couldn't load the contracts.
+
+This is the method I was using to get a Web3 contract instance:
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/contract-set.png" width="500">
+
+Upon debugging, I realised that networkId is coming as a hex string (116e1), while the PrisaleContract object.networks held the networkId as a dec (71393). So I changed the hex string to decimal using ParseInt.
+Also, while looking at this code, I realised I use window.ethereum, which we substituted for the PolyjuiceHttpProvider previously. I'm not sure if it makes a difference in this scenario as the front end was working now, but I decided to change it also to use the PolyjuiceHttpProvider we set up earlier.
+
+After these changes, this is how the code looked like:
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/contract-set-fixed.png" width="500">
+
+And when running in the browser, I saw:
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="500">
