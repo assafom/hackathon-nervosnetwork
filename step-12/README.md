@@ -358,7 +358,7 @@ There were two more things I needed to change:
 
 **And... that's it!**
 
-<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="600">
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="700">
 
 **The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. Only a minimal changes to the front end transcations (gas:6000000) and conversion of hardcoded addresses.
 
