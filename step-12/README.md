@@ -1,4 +1,4 @@
-# Port Truffle and React based DApp to Nervos' Polyjuice
+# Port Truffle and CRA based DApp to Nervos' Polyjuice
 
 ## How I ported my Ethereum DApp to Polyjuice (and how you can too)
 
@@ -11,9 +11,9 @@ Note that there are a few other resources that might be of interest to you:
 - If you just want a basic truffle project to use as a base, or to copy it's config file, you can use [simple-storage-v2](https://github.com/RetricSu/simple-storage-v2).
 - For other different tutorial on how to port your DApp to Polyjuice, you can see the [submissions at this hackathon](https://gitcoin.co/issue/nervosnetwork/grants/16/100026367).
 
-But if you have your own DApp using Truffle that you'd like to port, this tutorial is for you and will include all the info from the previous bullet points. Let's begin.
+But if you have your own DApp using Truffle and/or create-react-app that you'd like to port, this tutorial is for you and will include all the info from the previous bullet points. Let's begin.
 
-The porting consists of few simple steps:
+The porting basically consists of few simple steps:
 
 * Truffle - deploying smart contracts:
   * Change truffle's network to a Godwoken testnet RPC, and set the providers to support Polyjuice.
@@ -260,7 +260,7 @@ const addressTranslator = new AddressTranslator();
 
 Then tried to run, but got the following error.
 
-<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/react-error.png" width="400">
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/react-error.png" width="700">
 
 After some googling, it seemed like the issue could be fixed with a Babel plugin. However, I wasn't using Babel as a depedency at the time; I'm new to front-end and didn't see the need. So I tried to install it with the required plugin, but nothing changed. I vaguely recalled seeing a similar issue in the Nervos discord, so I asked for help there.
 
@@ -351,19 +351,19 @@ module.exports = function override(config, env) {
   }
 ```
 
-Now the app was able to load the AddressTranslator library. I've printed the user's Polujuice address to the screen.
+Now the app was able to load the AddressTranslator library. I've printed the user's Polyjuice address to the screen.
 ```
 Loaded Polyjuice address: <b>{accounts && accounts[0]?addressTranslator.ethAddressToGodwokenShortAddress(accounts[0]) : undefined}</b><br/>
 (Based on Ethereum address: {accounts && accounts[0]?accounts[0] : undefined})<br/>
 ```
 
-There was two more things I needed to change:
+There were two more things I needed to change:
 1. To display a button that only the contract owner can use, I previously checked whether accounts[0]==contract.owner(). However, accounts[0] is an eth address, and contract.owner() is Polyjuice. So I converted the accounts[0] address to Polyjuice using addressTranslator.ethAddressToGodwokenShortAddress and checked if they're equal.
 2. For testing/development purposes, I had some hardcoded ethereum addresses in my smart contract; I realised I need to change them to their Polyjuice equivalent.
 
 **And... that's it!**
 
-<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="500">
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="600">
 
 **The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. Only a minimal changes to the front end transcations (gas:6000000) and smart contracts (change of hardcoded eth addresses).
 
