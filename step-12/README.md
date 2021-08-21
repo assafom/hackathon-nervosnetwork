@@ -230,7 +230,13 @@ And when running in the browser, I saw:
 
 Yay, basically running!
 
-But I knew we aren't finished yet; there are two things we haven't done. We haven't set a gas limit to the transactions, and we haven't converted Ethereum addresses to Godwoken addresses. And indeed, trying to execute a command that changes the contract's state (and not just reads info) has failed.
+But I knew we aren't finished yet; there are two things we haven't done. We haven't set a gas limit to the transactions (at the moment needed for the Polyjuice provider), and we haven't imported the AddressTranslator so we can convert Ethereum addresses to Godwoken addresses.
+
+### Setting a 6000000 gas limit
+We should add a gaslimit to every transaction, for example like this:
+```this.contract.methods.set(value).send({gas: 6000000, from: fromAddress});
+```
+Per my understanding there should have been a way to do it automatically when we create the web3 Contract object, but it didn't work for me. So I just changed all my transactions to send gas: 6000000.
 
 ### Adding the AddressTranslator
 
@@ -255,11 +261,102 @@ The issue is that create-react-app uses a minimal Babel config to process the ap
 
 Daniel knew of two ways to fix it:
 
-1. Execute ```yarn eject``` and then adding the needed Babel plugins to config/webpack.config.ts
+1. Execute ```yarn eject``` and then add the needed Babel plugins to config/webpack.config.ts
 2. Use [react-app-rewired](https://github.com/timarney/react-app-rewired) to modify the webpack config without ejecting.
 
-I decided to try to use react-app-rewired.
+If you want to use the yarn eject method, you can try to match your webpack config file to the one Daniel provided [here](https://github.com/chaitanyasjoshi/social-network-dapp-polyjuice/blob/29cd1550f197582c49897de6edfaecc60b6e3912/config/webpack.config.js).
+
+I decided to try to use **react-app-rewired**.
+
+The [react-app-rewired repo](https://github.com/timarney/react-app-rewired) contains easy instructions for installing it.
+
+After installing, I needed to actually modify the webpack config to suit my needs, but I didn't even know how the config even looks like :)
+
+After printing, some debugging, and comparing it to Daniel's example (which was generated from yarn eject and contained more things than I needed), I managed to create a config file that's working. Note, that this was my first time using Babel/Webpack. I can not guarantee I didn't mess something up, and if you'll be using this, you probably wanna get somebody who's familiar with B/W to verify it's ok. But it seems to be working.
+
+This is my config-overrides.js. For brevity sake I removed the comments; if you'd be using this officialy, check out [Daniel's config](https://github.com/chaitanyasjoshi/social-network-dapp-polyjuice/blob/29cd1550f197582c49897de6edfaecc60b6e3912/config/webpack.config.js). At the very least you should change the "include" object to be your source folder.
+```
+module.exports = function override(config, env) {
+    config.module.rules.push({
+        // For client source files (not dependencies)
+        test: /\.(js|mjs|jsx|ts|tsx)$/,
+        include: require("path").join(__dirname, "/src"),
+        loader: require.resolve('babel-loader'),
+        options: {
+          customize: require.resolve(
+            'babel-preset-react-app/webpack-overrides'
+          ),
+          presets: [
+            [
+              require.resolve('babel-preset-react-app'),
+              {
+                runtime: 'automatic',
+              },
+            ]
+          ],
+          plugins: [
+            [
+              require.resolve('babel-plugin-named-asset-import'),
+              {
+                loaderMap: {
+                  svg: {
+                    ReactComponent:
+                      '@svgr/webpack?-svgo,+titleProp,+ref![path]',
+                  },
+                },
+              },
+            ],
+          ].filter(Boolean),
+          cacheDirectory: true,
+          cacheCompression: false,
+          compact: true,
+        },
+      },{
+        // For dependencies
+        test: /\.(js|mjs)$/,
+        exclude: /@babel(?:\/|\\{1,2})runtime/,
+        loader: require.resolve('babel-loader'),
+        options: {
+          babelrc: false,
+          configFile: false,
+          compact: false,
+          presets: [
+            [
+              require.resolve('babel-preset-react-app/dependencies'),
+              { helpers: true },
+            ],
+          ],
+          plugins: [
+            "@babel/plugin-proposal-class-properties",
+            "@babel/plugin-syntax-bigint",
+            "@babel/plugin-proposal-nullish-coalescing-operator",
+            "@babel/plugin-syntax-jsx",
+            "@babel/plugin-proposal-optional-chaining",
+          ],
+          cacheDirectory: true,
+          cacheCompression: false,
+        },
+      }
+    );
+    return config;
+  }
+```
+
+Now the app was able to load the AddressTranslator library. I've printed the user's Polujuice address to the screen.
+```
+Loaded Polyjuice address: <b>{accounts && accounts[0]?addressTranslator.ethAddressToGodwokenShortAddress(accounts[0]) : undefined}</b><br/>
+(Based on Ethereum address: {accounts && accounts[0]?accounts[0] : undefined})<br/>
+```
+
+There was one more thing I needed to change; to display a button that only the contract owner can use, I previously checked whether accounts[0]==contract.owner(). However, accounts[0] is an eth address, and contract.owner() is Polyjuice. So I converted the accounts[0] address to Polyjuice and checked if they're equal.
+
+**And... that's it!**
 
 
+** The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. And minimal changes to the transcations (gas:6000000).
 
-After adding dependedy, npm install, babel
+My DApp is utilised for OTC token presales. The admin can add a new campaign (for example for a new DEX being launched and wants people to prebuy its tokens), with a name and a price per token. Then the user can buy tokens, doing so transfering ERC20 token (mocking USDT) to the main contract using the ERC20 approval mechanism. The contract keeps tracks of how many tokens each address has bought. Then, the admin can close the sale, set the address for the new token, and distribution begins. Distribution of the presale token can happen in stages, eg. 10% is being released every month for 10 months. Each time the user calls the contract's claim function, the contract checks if any new token releases have arrived, and if so, sends the user's percentage of the token release. So if for example User A bought 10 tokens and user B bought 10 tokens, and 6 tokens have been released, and User A calls the claim button, he will receive 3 tokens. All this funcionality was working without needing changes. Pretty cool. 
+
+You can see a video of me executing it here.
+
+That's it :) Hope you found this helpful. If you need help, you are welcome in the [Nervos discord](https://discord.com/invite/AqGTUE9).
