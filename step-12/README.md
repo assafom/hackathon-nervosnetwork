@@ -9,7 +9,7 @@ If you're here, I assume you know what these terms mean, and you have your own D
 Note that there are a few other resources that might be of interest to you:
 - Nervos' team have supplied very clear instructions on how to port a DApp, however, in their example they deploy their contract via the DApp front end. If you're using Truffle for deploying your contracts, that will be less useful to you. [See here](https://gitcoin.co/issue/nervosnetwork/grants/8/100026214).
 - If you just want a basic truffle project to use as a base, or to copy it's config file, you can use [simple-storage-v2](https://github.com/RetricSu/simple-storage-v2).
-- For other different tutorial on how to port your DApp to Polyjuice, you can see the [submissions at this hackathon](https://gitcoin.co/issue/nervosnetwork/grants/16/100026367).
+- For other different tutorials on how to port your DApp to Polyjuice, you can see the [submissions at this hackathon](https://gitcoin.co/issue/nervosnetwork/grants/16/100026367).
 
 But if you have your own DApp using Truffle and/or create-react-app that you'd like to port, this tutorial is for you and will include all the info from the previous bullet points. Let's begin.
 
@@ -358,9 +358,11 @@ There were two more things I needed to change:
 
 **And... that's it!**
 
-<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="700">
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running3.png" width="700">
 
-**The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. Only a minimal changes to the front end transcations (gas:6000000) and conversion of hardcoded addresses.
+**The smart contracts and app were working straight out-of-the-box**.
+
+This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. Only a minimal changes to the front end transcations (gas:6000000) and conversion of hardcoded addresses.
 
 My DApp is utilised for OTC token presales. The admin can add a new campaign (for example for a new DEX being launched and wants people to prebuy its tokens), with a name and a price per token. Then the user can buy tokens, doing so transfering ERC20 token (mocking USDT) to the main contract using the ERC20 approval mechanism. The contract keeps tracks of how many tokens each address has bought. Then, the admin can close the sale, set the address for the new token, and distribution begins. Distribution of the presale token can happen in stages, eg. 10% is being released every month for 10 months. Each time the user calls the contract's claim function, the contract checks if any new token releases have arrived, and if so, sends the user's percentage of the token release. So if for example User A bought 10 tokens and user B bought 10 tokens, and 6 tokens have been released, and User A calls the claim button, he will receive 3 tokens. All this funcionality was working without needing changes. Pretty cool. 
 
