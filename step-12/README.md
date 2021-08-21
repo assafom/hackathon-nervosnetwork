@@ -232,4 +232,34 @@ Yay, basically running!
 
 But I knew we aren't finished yet; there are two things we haven't done. We haven't set a gas limit to the transactions, and we haven't converted Ethereum addresses to Godwoken addresses. And indeed, trying to execute a command that changes the contract's state (and not just reads info) has failed.
 
+### Adding the AddressTranslator
+
+I started by importing the dependency into App.js:
+```
+import { AddressTranslator } from 'nervos-godwoken-integration';
+```
+And inside function App() instantiating it:
+```
+const addressTranslator = new AddressTranslator();
+```
+
+Then tried to run, but got the following error.
+
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/address-error.png" width="400">
+
+After some googling, it seemed like the issue could be fixed with a Babel plugin. However, I wasn't using Babel as a depedency at the time; I'm new to front-end and didn't see the need. So I tried to install it with the required plugin, but nothing changed. I vaguely recalled seeing a similar issue in the Nervos discord, so I asked for help there.
+
+Thankfully, danielkmak from Nervos crew replied that he knows how to fix the issue.
+
+The issue is that create-react-app uses a minimal Babel config to process the app's dependencies, even if you try to specify otherwise in your babel config. This babel config will modify the config for your app, not the config for your dependencies.
+
+Daniel knew of two ways to fix it:
+
+1. Execute ```yarn eject``` and then adding the needed Babel plugins to config/webpack.config.ts
+2. Use [react-app-rewired](https://github.com/timarney/react-app-rewired) to modify the webpack config without ejecting.
+
+I decided to try to use react-app-rewired.
+
+
+
 After adding dependedy, npm install, babel
