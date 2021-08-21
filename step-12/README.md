@@ -1,4 +1,4 @@
-# Port Truffle and CRA based DApp to Nervos' Polyjuice
+# Port Truffle and React CRA based DApp to Nervos' Polyjuice
 
 ## How I ported my Ethereum DApp to Polyjuice (and how you can too)
 
