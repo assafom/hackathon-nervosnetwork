@@ -212,14 +212,9 @@ const provider = new PolyjuiceHttpProvider(godwokenRpcUrl, providerConfig);
 const web3 = new Web3(provider);
 ```
 
-At this point I knew I wasn't finished, but I thought that the front end should at least be running now so let's check it. Well, it didn't work :)
+At this point I knew I wasn't finished, but I thought that the front end should at least be running now so let's check it.
 
-I realised I should build the client using:
-```
-npm run-script build
-```
-
-Now the client has started, however, it couldn't load the contracts.
+The client has started, however it couldn't load the contracts.
 
 This is the method I was using to get a Web3 contract instance:
 
@@ -359,13 +354,13 @@ Loaded Polyjuice address: <b>{accounts && accounts[0]?addressTranslator.ethAddre
 
 There were two more things I needed to change:
 1. To display a button that only the contract owner can use, I previously checked whether accounts[0]==contract.owner(). However, accounts[0] is an eth address, and contract.owner() is Polyjuice. So I converted the accounts[0] address to Polyjuice using addressTranslator.ethAddressToGodwokenShortAddress and checked if they're equal.
-2. For testing/development purposes, I had some hardcoded ethereum addresses in my smart contract; I realised I need to change them to their Polyjuice equivalent.
+2. For testing/development purposes, I had some hardcoded ethereum addresses in my smart contract and front end; I realised I need to change them to their Polyjuice equivalent.
 
 **And... that's it!**
 
 <img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="600">
 
-**The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. Only a minimal changes to the front end transcations (gas:6000000) and smart contracts (change of hardcoded eth addresses).
+**The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. Only a minimal changes to the front end transcations (gas:6000000) and conversion of hardcoded addresses.
 
 My DApp is utilised for OTC token presales. The admin can add a new campaign (for example for a new DEX being launched and wants people to prebuy its tokens), with a name and a price per token. Then the user can buy tokens, doing so transfering ERC20 token (mocking USDT) to the main contract using the ERC20 approval mechanism. The contract keeps tracks of how many tokens each address has bought. Then, the admin can close the sale, set the address for the new token, and distribution begins. Distribution of the presale token can happen in stages, eg. 10% is being released every month for 10 months. Each time the user calls the contract's claim function, the contract checks if any new token releases have arrived, and if so, sends the user's percentage of the token release. So if for example User A bought 10 tokens and user B bought 10 tokens, and 6 tokens have been released, and User A calls the claim button, he will receive 3 tokens. All this funcionality was working without needing changes. Pretty cool. 
 
