@@ -9,7 +9,7 @@ If you're here, I assume you know what these terms mean, and you have your own D
 Note that there are a few other resources that might be of interest to you:
 - Nervos' team have supplied very clear instructions on how to port a DApp, however, in their example they deploy their contract via the DApp front end. If you're using Truffle for deploying your contracts, that will be less useful to you. [See here](https://gitcoin.co/issue/nervosnetwork/grants/8/100026214).
 - If you just want a basic truffle project to use as a base, or to copy it's config file, you can use [simple-storage-v2](https://github.com/RetricSu/simple-storage-v2).
-- For other different tutorial on how to port your DApp to Polyjuice, you can see the [Submissions at this hackathon](https://gitcoin.co/issue/nervosnetwork/grants/16/100026367).
+- For other different tutorial on how to port your DApp to Polyjuice, you can see the [submissions at this hackathon](https://gitcoin.co/issue/nervosnetwork/grants/16/100026367).
 
 But if you have your own DApp using Truffle that you'd like to port, this tutorial is for you and will include all the info from the previous bullet points. Let's begin.
 
@@ -21,7 +21,6 @@ The porting consists of few simple steps:
 * Front-end:
   * Change the Web3 provider to one that supports Polyjuice
   * Use a supplied module for translating addresses Ethereum <-> Godwoken
-  * 
 
 ### Truffle Deployment
 The DApp I am currently working on hasn't been deployed yet, and my Truffle configuration only consisted of connecting to my local Ganache instance.
@@ -172,6 +171,15 @@ There are basically two things that are needed here.
 
 2. We need to be able to convert Ethereum addresses to Godwoken addresses. This we can do with the nervos-godwoken-integration module.
 
+Before this, if you didn't yet configure Godwoken Testnet on your MetaMask, do so now.
+```
+Network Name: Godwoken Testnet
+RPC URL: https://godwoken-testnet-web3-rpc.ckbapp.dev
+Chain ID: 71393
+Currency Symbol: <Leave Empty>
+Block Explorer URL: <Leave Empty>
+```
+
 So first let's navigate to the front-end directory and install the modules:
 ```
 npm install @polyjuice-provider/web3@0.0.1-rc7 nervos-godwoken-integration@0.0.6
@@ -192,7 +200,7 @@ import { PolyjuiceHttpProvider } from '@polyjuice-provider/web3';
 import { CONFIG } from './config.js';
 ```
 
-And where I previously created Web3 by executing ```const web3 = new Web3(window.ethereum);```, I change it to use the configured Polyjuice provider.
+And where I previously created Web3 by executing ```const web3 = new Web3(window.ethereum);```, I changed it to use the configured Polyjuice provider.
 ```
 const godwokenRpcUrl = CONFIG.WEB3_PROVIDER_URL;
 const providerConfig = {
@@ -204,9 +212,9 @@ const provider = new PolyjuiceHttpProvider(godwokenRpcUrl, providerConfig);
 const web3 = new Web3(provider);
 ```
 
-At this point I know I wasn't finished, but I thought that the front end should at least be running now so let's check it.
+At this point I knew I wasn't finished, but I thought that the front end should at least be running now so let's check it. Well, it didn't work :)
 
-After getting an error when trying to run, I realised I should build the client using:
+I realised I should build the client using:
 ```
 npm run-script build
 ```
@@ -217,7 +225,7 @@ This is the method I was using to get a Web3 contract instance:
 
 <img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/contract-set.png" width="500">
 
-Upon debugging, I realised that networkId is coming as a hex string (116e1), while the PrisaleContract object.networks held the networkId as a dec (71393). So I changed the hex string to decimal using ParseInt.
+Upon debugging, I realised that networkId is coming as a hex string (116e1), while the PrisaleContract object.networks held the networkId as a dec (71393). So I changed the hex string to decimal using parseInt.
 Also, while looking at this code, I realised I use window.ethereum, which we substituted for the PolyjuiceHttpProvider previously. I'm not sure if it makes a difference in this scenario as the front end was working now, but I decided to change it also to use the PolyjuiceHttpProvider we set up earlier.
 
 After these changes, this is how the code looked like:
@@ -234,7 +242,8 @@ But I knew we aren't finished yet; there are two things we haven't done. We have
 
 ### Setting a 6000000 gas limit
 We should add a gaslimit to every transaction, for example like this:
-```this.contract.methods.set(value).send({gas: 6000000, from: fromAddress});
+```
+this.contract.methods.set(value).send({gas: 6000000, from: fromAddress});
 ```
 Per my understanding there should have been a way to do it automatically when we create the web3 Contract object, but it didn't work for me. So I just changed all my transactions to send gas: 6000000.
 
@@ -251,13 +260,13 @@ const addressTranslator = new AddressTranslator();
 
 Then tried to run, but got the following error.
 
-<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/address-error.png" width="400">
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/react-error.png" width="400">
 
 After some googling, it seemed like the issue could be fixed with a Babel plugin. However, I wasn't using Babel as a depedency at the time; I'm new to front-end and didn't see the need. So I tried to install it with the required plugin, but nothing changed. I vaguely recalled seeing a similar issue in the Nervos discord, so I asked for help there.
 
 Thankfully, danielkmak from Nervos crew replied that he knows how to fix the issue.
 
-The issue is that create-react-app uses a minimal Babel config to process the app's dependencies, even if you try to specify otherwise in your babel config. This babel config will modify the config for your app, not the config for your dependencies.
+The problem was that create-react-app uses a minimal Babel config to process the app's dependencies, even if you try to specify otherwise in your babel config. This babel config will modify the config for your app, not the config for your dependencies.
 
 Daniel knew of two ways to fix it:
 
@@ -270,7 +279,7 @@ I decided to try to use **react-app-rewired**.
 
 The [react-app-rewired repo](https://github.com/timarney/react-app-rewired) contains easy instructions for installing it.
 
-After installing, I needed to actually modify the webpack config to suit my needs, but I didn't even know how the config even looks like :)
+After installing, I needed to actually modify the webpack config to suit my needs, but I didn't even know how the config looks like :)
 
 After printing, some debugging, and comparing it to Daniel's example (which was generated from yarn eject and contained more things than I needed), I managed to create a config file that's working. Note, that this was my first time using Babel/Webpack. I can not guarantee I didn't mess something up, and if you'll be using this, you probably wanna get somebody who's familiar with B/W to verify it's ok. But it seems to be working.
 
@@ -348,15 +357,18 @@ Loaded Polyjuice address: <b>{accounts && accounts[0]?addressTranslator.ethAddre
 (Based on Ethereum address: {accounts && accounts[0]?accounts[0] : undefined})<br/>
 ```
 
-There was one more thing I needed to change; to display a button that only the contract owner can use, I previously checked whether accounts[0]==contract.owner(). However, accounts[0] is an eth address, and contract.owner() is Polyjuice. So I converted the accounts[0] address to Polyjuice and checked if they're equal.
+There was two more things I needed to change:
+1. To display a button that only the contract owner can use, I previously checked whether accounts[0]==contract.owner(). However, accounts[0] is an eth address, and contract.owner() is Polyjuice. So I converted the accounts[0] address to Polyjuice using addressTranslator.ethAddressToGodwokenShortAddress and checked if they're equal.
+2. For testing/development purposes, I had some hardcoded ethereum addresses in my smart contract; I realised I need to change them to their Polyjuice equivalent.
 
 **And... that's it!**
 
+<img src="https://github.com/assafom/hackathon-nervosnetwork/blob/main/step-12/running1.png" width="500">
 
-** The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. And minimal changes to the transcations (gas:6000000).
+**The smart contracts and app were working straight out-of-the-box**. This is the power of Godwoken-Polyjuice I think. In the actual functionality and business logic, nothing needed to be changed. Only a minimal changes to the front end transcations (gas:6000000) and smart contracts (change of hardcoded eth addresses).
 
 My DApp is utilised for OTC token presales. The admin can add a new campaign (for example for a new DEX being launched and wants people to prebuy its tokens), with a name and a price per token. Then the user can buy tokens, doing so transfering ERC20 token (mocking USDT) to the main contract using the ERC20 approval mechanism. The contract keeps tracks of how many tokens each address has bought. Then, the admin can close the sale, set the address for the new token, and distribution begins. Distribution of the presale token can happen in stages, eg. 10% is being released every month for 10 months. Each time the user calls the contract's claim function, the contract checks if any new token releases have arrived, and if so, sends the user's percentage of the token release. So if for example User A bought 10 tokens and user B bought 10 tokens, and 6 tokens have been released, and User A calls the claim button, he will receive 3 tokens. All this funcionality was working without needing changes. Pretty cool. 
 
-You can see a video of me executing it here.
+You can watch a 7 minutes video of me using the deployed DApp [here](https://youtu.be/8ZSnclqk0jk).
 
 That's it :) Hope you found this helpful. If you need help, you are welcome in the [Nervos discord](https://discord.com/invite/AqGTUE9).
